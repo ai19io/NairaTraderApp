@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e0f11">
+<title>NairaTrader</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#0e0f11;--bg2:#161719;--bg3:#1e2023;--bg4:#26282c;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+  --text:#f0f0ee;--text2:#9a9b9e;--text3:#5e5f63;
+  --accent:#f0c040;--green:#4caf7d;--green-bg:rgba(76,175,125,0.12);
+  --red:#e05c5c;--red-bg:rgba(224,92,92,0.12);
+  --amber:#e8a030;--amber-bg:rgba(232,160,48,0.12);
+  --blue:#5a9de8;--blue-bg:rgba(90,157,232,0.12);
+  --r:12px;--rsm:8px;
+}
+
+html,body{height:100%;overflow:hidden;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ─── SCREEN SYSTEM ─── */
+.screen{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  background:var(--bg);
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s;
+  overflow:hidden;
+}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none;}
+.screen.slide-left{transform:translateX(-30%);opacity:0;pointer-events:none;}
+
+/* ─── SPLASH ─── */
+#screen-splash{
+  align-items:center;justify-content:center;
+  background:var(--bg);
+}
+.splash-glow{
+  position:absolute;top:-120px;left:50%;transform:translateX(-50%);
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,192,64,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.splash-icon{
+  width:80px;height:80px;border-radius:22px;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;font-weight:800;color:#000;
+  margin-bottom:24px;
+  box-shadow:0 0 60px rgba(240,192,64,0.25);
+}
+.splash-title{font-size:28px;font-weight:700;color:var(--text);margin-bottom:6px;text-align:center;}
+.splash-sub{font-size:14px;color:var(--text2);text-align:center;margin-bottom:48px;max-width:260px;}
+.splash-btn{
+  background:var(--accent);color:#000;
+  border:none;border-radius:14px;
+  padding:16px 48px;font-size:16px;font-weight:700;
+  cursor:pointer;letter-spacing:0.01em;
+  box-shadow:0 4px 24px rgba(240,192,64,0.3);
+  transition:transform 0.1s,box-shadow 0.1s;
+}
+.splash-btn:active{transform:scale(0.97);box-shadow:0 2px 12px rgba(240,192,64,0.2);}
+.splash-disclaimer{
+  position:absolute;bottom:32px;
+  font-size:11px;color:var(--text3);text-align:center;padding:0 32px;line-height:1.6;
+}
+
+/* ─── HOME ─── */
+#screen-home{overflow-y:auto;}
+.home-header{
+  padding:52px 24px 24px;
+  background:var(--bg);
+}
+.home-greeting{font-size:12px;color:var(--text3);margin-bottom:4px;letter-spacing:0.04em;text-transform:uppercase;}
+.home-title{font-size:24px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.home-sub{font-size:13px;color:var(--text2);line-height:1.6;}
+
+.home-hero{
+  margin:0 16px 8px;
+  background:linear-gradient(135deg,rgba(240,192,64,0.15) 0%,rgba(240,192,64,0.04) 100%);
+  border:1px solid rgba(240,192,64,0.2);
+  border-radius:16px;
+  padding:20px;
+  display:flex;align-items:center;gap:16px;
+  cursor:pointer;
+  transition:transform 0.12s,border-color 0.12s;
+}
+.home-hero:active{transform:scale(0.985);}
+.home-hero-icon{
+  width:52px;height:52px;background:var(--accent);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+}
+.home-hero-text .hht{font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.home-hero-text .hhs{font-size:12px;color:var(--text2);line-height:1.5;}
+.home-hero-arrow{margin-left:auto;color:var(--accent);font-size:20px;flex-shrink:0;}
+
+.home-section-label{
+  font-size:10px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:0.08em;
+  padding:20px 20px 8px;
+}
+
+.menu-list{padding:0 16px;display:flex;flex-direction:column;gap:8px;}
+.menu-item{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;
+  transition:background 0.12s,border-color 0.12s,transform 0.1s;
+}
+.menu-item:active{transform:scale(0.985);background:var(--bg3);}
+.menu-item-icon{
+  width:40px;height:40px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.mi-blue{background:var(--blue-bg);}
+.mi-green{background:var(--green-bg);}
+.mi-amber{background:var(--amber-bg);}
+.menu-item-text .mit{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.menu-item-text .mis{font-size:12px;color:var(--text3);}
+.menu-item-arrow{margin-left:auto;color:var(--text3);font-size:16px;flex-shrink:0;}
+
+.home-bottom{height:32px;}
+
+/* ─── INNER SCREENS (About, Rules, Calculator) ─── */
+#screen-about,#screen-rules,#screen-calc{overflow:hidden;}
+
+.inner-header{
+  display:flex;align-items:center;gap:12px;
+  padding:52px 16px 14px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.back-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--bg3);border:none;
+  color:var(--text2);font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:background 0.12s;
+}
+.back-btn:active{background:var(--bg4);}
+.inner-title{font-size:16px;font-weight:600;color:var(--text);}
+
+.inner-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* ─── ABOUT CONTENT ─── */
+.about-hero{
+  padding:28px 20px 20px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  border-bottom:1px solid var(--border);
+}
+.about-logo{
+  width:64px;height:64px;border-radius:18px;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;font-weight:800;color:#000;
+  margin-bottom:14px;
+}
+.about-name{font-size:20px;font-weight:700;margin-bottom:4px;}
+.about-tagline{font-size:13px;color:var(--text2);}
+
+.stat-band{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid var(--border);
+}
+.stat-item{
+  padding:16px 12px;text-align:center;
+  border-right:1px solid var(--border);
+}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-size:18px;font-weight:700;color:var(--accent);margin-bottom:2px;}
+.stat-lbl{font-size:10px;color:var(--text3);}
+
+.prose-section{padding:20px;}
+.prose-section h3{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;}
+.prose-section p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;}
+.prose-section p:last-child{margin-bottom:0;}
+
+.about-cards{padding:0 16px 20px;display:flex;flex-direction:column;gap:8px;}
+.about-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;display:flex;gap:12px;align-items:flex-start;
+}
+.about-card-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.about-card-text .act{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.about-card-text .acs{font-size:12px;color:var(--text2);line-height:1.5;}
+
+.visit-btn{
+  margin:4px 16px 28px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:rgba(240,192,64,0.1);border:1px solid rgba(240,192,64,0.25);
+  border-radius:var(--r);padding:13px;
+  color:var(--accent);font-size:13px;font-weight:500;
+  cursor:pointer;text-decoration:none;
+  transition:background 0.12s;
+}
+.visit-btn:active{background:rgba(240,192,64,0.18);}
+
+/* ─── RULES CONTENT ─── */
+.rules-intro{
+  padding:16px 20px;
+  background:rgba(240,192,64,0.06);
+  border-bottom:1px solid rgba(240,192,64,0.12);
+  font-size:12px;color:var(--text2);line-height:1.6;
+}
+
+.rules-group{padding:16px 16px 0;}
+.rules-group-title{
+  font-size:10px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:0.07em;
+  margin-bottom:10px;padding:0 4px;
+}
+.rule-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:8px;overflow:hidden;
+}
+.rule-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--border);
+}
+.rule-row:last-child{border-bottom:none;}
+.rule-key{font-size:12px;color:var(--text2);}
+.rule-val{font-size:13px;font-weight:500;color:var(--text);}
+.rule-val.good{color:var(--green);}
+.rule-val.warn{color:var(--amber);}
+.rule-val.bad{color:var(--red);}
+
+.rules-warning{
+  margin:16px 16px 8px;
+  background:var(--amber-bg);border:1px solid rgba(232,160,48,0.25);
+  border-radius:var(--r);padding:14px 16px;
+}
+.rules-warning .rw-title{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;}
+.rules-warning p{font-size:12px;color:var(--amber);line-height:1.6;opacity:0.85;}
+.rules-bottom{height:24px;}
+
+/* ─── CALCULATOR SCREEN ─── */
+.calc-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:52px 16px 0;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.calc-header-left{display:flex;align-items:center;gap:10px;}
+.calc-tabs-row{
+  display:flex;gap:0;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+  padding:0 16px;margin-top:10px;
+}
+.calc-tabs-row::-webkit-scrollbar{display:none;}
+.ctab{
+  flex-shrink:0;padding:10px 14px;
+  font-size:12px;color:var(--text3);
+  border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;transition:color 0.12s,border-color 0.12s;
+}
+.ctab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+.calc-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px 100px;}
+
+/* SETTINGS STRIP */
+.settings-strip{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px;
+  margin-bottom:16px;
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.ss-field{display:flex;flex-direction:column;gap:5px;}
+.ss-field label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;}
+.ss-field select{
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--rsm);color:var(--text);
+  font-size:13px;padding:8px 26px 8px 10px;
+  cursor:pointer;outline:none;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235e5f63' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;
+}
+.ss-field-full{grid-column:1/-1;}
+.range-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.range-row label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;}
+.range-val{font-size:12px;font-weight:600;color:var(--accent);}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:4px;
+  background:var(--bg4);border-radius:99px;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background:var(--accent);border:3px solid var(--bg2);cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);border:3px solid var(--bg2);cursor:pointer;
+}
+
+/* METRIC GRID */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 13px;}
+.metric-card.hl{border-color:rgba(240,192,64,0.3);}
+.ml{font-size:9px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;}
+.mv{font-size:18px;font-weight:700;line-height:1;margin-bottom:2px;}
+.ms{font-size:10px;color:var(--text3);}
+.mv.green{color:var(--green);}.mv.red{color:var(--red);}.mv.amber{color:var(--amber);}.mv.accent{color:var(--accent);}
+
+/* PANELS */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden;}
+.panel-header{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:3px;}
+.panel-title{font-size:12px;font-weight:500;}
+.panel-sub{font-size:10px;color:var(--text3);}
+.panel-body{padding:14px;}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;min-width:320px;}
+th{font-size:9px;font-weight:500;color:var(--text3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;}
+td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);}
+tr:last-child td{border-bottom:none;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.bg{background:var(--green-bg);color:var(--green);}
+.br{background:var(--red-bg);color:var(--red);}
+.ba{background:var(--amber-bg);color:var(--amber);}
+.bb{background:var(--blue-bg);color:var(--blue);}
+.bac{background:rgba(240,192,64,0.12);color:var(--accent);}
+
+/* ALERTS */
+.alert{border-radius:var(--rsm);padding:10px 12px;font-size:12px;margin-top:8px;line-height:1.5;}
+.ag{background:var(--green-bg);color:var(--green);border:1px solid rgba(76,175,125,0.25);}
+.ar{background:var(--red-bg);color:var(--red);border:1px solid rgba(224,92,92,0.25);}
+.aa{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(232,160,48,0.25);}
+
+/* ZONE ROWS */
+.zone-row{padding:11px 0;border-bottom:1px solid var(--border);}
+.zone-row:last-child{border-bottom:none;}
+.zone-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:3px;}
+.zone-bar-bg{height:5px;background:var(--bg4);border-radius:99px;overflow:hidden;}
+.zone-bar{height:100%;border-radius:99px;}
+.zone-bottom{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--text3);flex-wrap:wrap;gap:3px;}
+
+/* TRADE ROWS */
+.trade-row{display:grid;grid-template-columns:20px 84px 1fr 86px;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.trade-row:last-child{border-bottom:none;}
+.trade-n{font-size:10px;color:var(--text3);}
+.trade-r{font-size:12px;font-weight:500;}
+.trade-bg{height:4px;background:var(--bg4);border-radius:99px;overflow:hidden;}
+.trade-b{height:100%;border-radius:99px;}
+.trade-bl{font-size:11px;color:var(--text2);text-align:right;}
+
+/* EDGE RING */
+.edge-ring{display:flex;align-items:center;gap:14px;}
+.ring-wrap{position:relative;width:68px;height:68px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.ri-l{font-size:10px;color:var(--text3);margin-bottom:3px;}
+.ri-v{font-size:16px;font-weight:600;margin-bottom:2px;}
+.ri-s{font-size:11px;color:var(--text2);}
+
+/* MONTH BARS */
+.month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:10px;}
+.month-bwrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.month-bbg{width:100%;height:60px;background:var(--bg4);border-radius:var(--rsm);overflow:hidden;display:flex;align-items:flex-end;}
+.month-bfill{width:100%;border-radius:var(--rsm);}
+.month-lbl{font-size:9px;color:var(--text3);}
+.month-val{font-size:9px;color:var(--text2);font-weight:500;text-align:center;}
+
+/* SIM BTNS */
+.sim-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.btn-primary{background:var(--accent);color:#000;border:none;border-radius:var(--rsm);padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 16px;font-size:13px;cursor:pointer;white-space:nowrap;}
+
+/* CALC TAB PANELS */
+.ctab-panel{display:none;}
+.ctab-panel.active{display:block;}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:14px;}
+.page-header h2{font-size:16px;font-weight:600;margin-bottom:2px;}
+.page-header p{font-size:12px;color:var(--text2);}
+
+/* STAT ROW */
+.stat-r{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;background:var(--bg3);border-radius:var(--rsm);margin-bottom:6px;}
+.sr-l{font-size:12px;color:var(--text2);}
+.sr-v{font-size:15px;font-weight:600;}
+
+/* DESKTOP OVERRIDES */
+@media(min-width:769px){
+  .calc-header{padding-top:20px;}
+  .inner-header{padding-top:20px;}
+  .desktop-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .calc-body{padding:20px 28px 40px;}
+  .metric-grid{grid-template-columns:repeat(4,1fr);}
+  .settings-strip{grid-template-columns:repeat(4,1fr);}
+  .back-btn{display:none;}
+}
+@media(max-width:768px){
+  .desktop-two{display:flex;flex-direction:column;gap:12px;}
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+  z-index: 100;
+  display: none;
+}
+.bottom-nav.visible { display: block; }
+.bottom-nav-inner {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 100%;
+}
+.bnav-btn {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  padding: 6px 2px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text3);
+  font-size: 10px; line-height: 1.2;
+  width: 100%;
+  transition: color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.bnav-btn.active { color: var(--accent); }
+.bnav-btn svg { width: 22px; height: 22px; }
+@media(max-width: 768px) {
+  .bottom-nav { display: block; }
+  .calc-body { padding-bottom: 88px !important; }
+  .inner-body { padding-bottom: 80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SPLASH ═══════════════ -->
+<div class="screen" id="screen-splash" style="display:none;">
+  <div class="splash-glow"></div>
+  <div class="splash-icon">N</div>
+  <div class="splash-title">NairaTrader</div>
+  <div class="splash-sub">Your prop firm challenge calculator and guide — all in one place.</div>
+  <button class="splash-btn" onclick="goTo('splash','home')">Get started</button>
+  <div class="splash-disclaimer">
+    This tool is for educational purposes only. Trading involves significant risk of loss. Past performance does not guarantee future results.
+  </div>
+  <div style="position:absolute;bottom:10px;font-size:11px;color:var(--text3);text-align:center;width:100%;">
+    Built by <span style="color:var(--accent);font-weight:500;">Mike Woka</span>
+  </div>
+</div>
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="screen hidden" id="screen-home" style="display:none;">
+  <div class="inner-body">
+    <div class="home-header">
+      <div class="home-greeting">Welcome</div>
+      <div class="home-title">What would you like to do?</div>
+      <div class="home-sub">Everything you need to evaluate the NairaTrader prop firm challenge.</div>
+    </div>
+
+    <!-- Hero CTA: Calculator -->
+    <div class="home-hero" onclick="goTo('home','calc')">
+      <div class="home-hero-icon">📊</div>
+      <div class="home-hero-text">
+        <div class="hht">Open the Calculator</div>
+        <div class="hhs">Risk simulator, trader profiles, funded projections and more.</div>
+      </div>
+      <div class="home-hero-arrow">›</div>
+    </div>
+
+    <div class="home-section-label">Learn more</div>
+
+    <div class="menu-list">
+      <div class="menu-item" onclick="goTo('home','about')">
+        <div class="menu-item-icon mi-blue">🏢</div>
+        <div class="menu-item-text">
+          <div class="mit">About NairaTrader</div>
+          <div class="mis">Who they are, what they offer, platform details</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+
+      <div class="menu-item" onclick="goTo('home','rules')">
+        <div class="menu-item-icon mi-amber">📋</div>
+        <div class="menu-item-text">
+          <div class="mit">Challenge rules</div>
+          <div class="mis">Drawdown, targets, restrictions — all the details</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+
+      <div class="menu-item" onclick="goTo('home','calc')">
+        <div class="menu-item-icon mi-green">🧮</div>
+        <div class="menu-item-text">
+          <div class="mit">Risk calculator</div>
+          <div class="mis">Model your edge, simulate trades, project income</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+    </div>
+    <div class="home-bottom"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ ABOUT ═══════════════ -->
+<div class="screen hidden" id="screen-about">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goBack('about','home')">‹</button>
+    <span class="inner-title">About NairaTrader</span>
+  </div>
+  <div class="inner-body">
+    <div class="about-hero">
+      <div class="about-logo">N</div>
+      <div class="about-name">NairaTrader</div>
+      <div class="about-tagline">Nigerian-focused proprietary trading firm</div>
+    </div>
+
+    <div class="stat-band">
+      <div class="stat-item"><div class="stat-num">20%</div><div class="stat-lbl">Max drawdown</div></div>
+      <div class="stat-item"><div class="stat-num">80%</div><div class="stat-lbl">Profit split</div></div>
+      <div class="stat-item"><div class="stat-num">2</div><div class="stat-lbl">Phase challenge</div></div>
+    </div>
+
+    <div class="prose-section">
+      <h3>What is NairaTrader?</h3>
+      <p>NairaTrader is a Nigerian prop firm that funds traders with virtual capital in exchange for a share of the profits. Traders pay a one-time challenge fee, prove their skill across two evaluation phases, and receive a funded account to trade with real payouts.</p>
+      <p>The firm is positioned squarely for the Nigerian market, pricing its challenge fees in Naira and offering account sizes starting at ₦200,000 all the way up to ₦1,000,000 and beyond.</p>
+    </div>
+
+    <div class="about-cards">
+      <div class="about-card">
+        <div class="about-card-icon">💻</div>
+        <div class="about-card-text">
+          <div class="act">Platform: MetaTrader 5 (MT5)</div>
+          <div class="acs">Industry-standard platform. Supports all major asset classes, EAs, and custom indicators.</div>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">📈</div>
+        <div class="about-card-text">
+          <div class="act">No asset restrictions confirmed</div>
+          <div class="acs">Forex pairs, Gold (XAUUSD), NAS100, US30, and other indices are available. Always verify with support before trading.</div>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">💸</div>
+        <div class="about-card-text">
+          <div class="act">Fast payouts advertised</div>
+          <div class="acs">The firm advertises payouts within 24 hours of request, with an 80% profit split to the trader.</div>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🔒</div>
+        <div class="about-card-text">
+          <div class="act">Instant KYC</div>
+          <div class="acs">Identity verification is handled quickly so you can get funded without long waiting periods.</div>
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">⚠️</div>
+        <div class="about-card-text">
+          <div class="act">Always verify before paying</div>
+          <div class="acs">Confirm EA/bot rules, news trading policy, copy trading rules, and proof of live payouts directly with the firm at nairatrader.is before purchasing any challenge.</div>
+        </div>
+      </div>
+    </div>
+
+    <a class="visit-btn" href="https://nairatrader.is" target="_blank">
+      🌐 Visit nairatrader.is
+    </a>
+
+    <div style="margin:0 16px 32px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(240,192,64,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👤</div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.05em;">Built by</div>
+        <div style="font-size:15px;font-weight:600;color:var(--accent);">Mike Woka</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">Forex trader · built this to help fellow traders protect their accounts</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RULES ═══════════════ -->
+<div class="screen hidden" id="screen-rules">
+  <div class="inner-header">
+    <button class="back-btn" onclick="goBack('rules','home')">‹</button>
+    <span class="inner-title">Challenge rules</span>
+  </div>
+  <div class="inner-body">
+    <div class="rules-intro">
+      All rules below are based on published NairaTrader terms. Verify directly with the firm before purchasing — rules can change.
+    </div>
+
+    <div class="rules-group">
+      <div class="rules-group-title">Challenge structure</div>
+      <div class="rule-card">
+        <div class="rule-row"><span class="rule-key">Evaluation phases</span><span class="rule-val good">2-Step</span></div>
+        <div class="rule-row"><span class="rule-key">Phase 1 profit target</span><span class="rule-val">10%</span></div>
+        <div class="rule-row"><span class="rule-key">Phase 2 profit target</span><span class="rule-val">10%</span></div>
+        <div class="rule-row"><span class="rule-key">Maximum drawdown</span><span class="rule-val good">20% (trailing)</span></div>
+        <div class="rule-row"><span class="rule-key">Daily drawdown limit</span><span class="rule-val good">None</span></div>
+        <div class="rule-row"><span class="rule-key">Time limit</span><span class="rule-val good">Unlimited</span></div>
+        <div class="rule-row"><span class="rule-key">Minimum trading days</span><span class="rule-val good">None</span></div>
+        <div class="rule-row"><span class="rule-key">Consistency rule</span><span class="rule-val good">None</span></div>
+      </div>
+    </div>
+
+    <div class="rules-group">
+      <div class="rules-group-title">Account sizes &amp; fees</div>
+      <div class="rule-card">
+        <div class="rule-row"><span class="rule-key">₦200,000 account</span><span class="rule-val">₦8,900 fee</span></div>
+        <div class="rule-row"><span class="rule-key">₦400,000 account</span><span class="rule-val">₦18,500 fee</span></div>
+        <div class="rule-row"><span class="rule-key">₦600,000 account</span><span class="rule-val">₦28,000 fee</span></div>
+        <div class="rule-row"><span class="rule-key">₦800,000 account</span><span class="rule-val">₦38,000 fee</span></div>
+        <div class="rule-row"><span class="rule-key">₦1,000,000 account</span><span class="rule-val">₦48,000 fee</span></div>
+      </div>
+    </div>
+
+    <div class="rules-group">
+      <div class="rules-group-title">Trading conditions</div>
+      <div class="rule-card">
+        <div class="rule-row"><span class="rule-key">Platform</span><span class="rule-val">MetaTrader 5</span></div>
+        <div class="rule-row"><span class="rule-key">Weekend holding</span><span class="rule-val good">Allowed</span></div>
+        <div class="rule-row"><span class="rule-key">Profit split (trader)</span><span class="rule-val good">80%</span></div>
+        <div class="rule-row"><span class="rule-key">Minimum withdrawal</span><span class="rule-val">10% profit</span></div>
+        <div class="rule-row"><span class="rule-key">Payout speed</span><span class="rule-val">Within 24hrs</span></div>
+        <div class="rule-row"><span class="rule-key">Inactivity limit</span><span class="rule-val warn">Trade every 5 days</span></div>
+      </div>
+    </div>
+
+    <div class="rules-group">
+      <div class="rules-group-title">Restrictions</div>
+      <div class="rule-card">
+        <div class="rule-row"><span class="rule-key">Scalping (1–2 min trades)</span><span class="rule-val warn">Max 5–6 positions</span></div>
+        <div class="rule-row"><span class="rule-key">News trading</span><span class="rule-val warn">Verify with firm</span></div>
+        <div class="rule-row"><span class="rule-key">EA / bots</span><span class="rule-val warn">Verify with firm</span></div>
+        <div class="rule-row"><span class="rule-key">Copy trading</span><span class="rule-val warn">Verify with firm</span></div>
+      </div>
+    </div>
+
+    <div class="rules-warning">
+      <div class="rw-title">⚠️ The trailing drawdown — most important rule</div>
+      <p>The 20% drawdown is not fixed from your starting balance. As your equity grows, the floor rises with it. If you grow from ₦200,000 to ₦260,000, your floor moves to ₦220,000. A normal losing streak that was safe at the start can breach the account later. Use the calculator to model this precisely.</p>
+    </div>
+    <div class="rules-bottom"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ CALCULATOR ═══════════════ -->
+<div class="screen hidden" id="screen-calc">
+  <div class="calc-header">
+    <div class="calc-header-left">
+      <button class="back-btn" onclick="goBack('calc','home')">‹</button>
+      <span class="inner-title">Challenge Calculator</span>
+    </div>
+    <div class="calc-tabs-row">
+      <button class="ctab active" data-tab="overview" onclick="switchCalcTab('overview',this)">Overview</button>
+      <button class="ctab" data-tab="risk" onclick="switchCalcTab('risk',this)">Risk zones</button>
+      <button class="ctab" data-tab="profiles" onclick="switchCalcTab('profiles',this)">Profiles</button>
+      <button class="ctab" data-tab="sim" onclick="switchCalcTab('sim',this)">Simulate</button>
+      <button class="ctab" data-tab="funded" onclick="switchCalcTab('funded',this)">Funded</button>
+    </div>
+  </div>
+
+  <div class="calc-body">
+
+    <!-- SETTINGS STRIP -->
+    <div class="settings-strip">
+      <div class="ss-field">
+        <label>Account size</label>
+        <select id="acctSize" onchange="calc()">
+          <option value="200000">₦200,000</option>
+          <option value="400000">₦400,000</option>
+          <option value="600000">₦600,000</option>
+          <option value="800000">₦800,000</option>
+          <option value="1000000">₦1,000,000</option>
+        </select>
+      </div>
+      <div class="ss-field">
+        <label>Risk-reward</label>
+        <select id="rrRatio" onchange="calc()">
+          <option value="2">1 : 2</option>
+          <option value="3">1 : 3</option>
+        </select>
+      </div>
+      <div class="ss-field ss-field-full">
+        <div class="range-row"><label>Win rate</label><span class="range-val" id="winRateVal">45%</span></div>
+        <input type="range" min="25" max="65" step="1" value="45" id="winRate" oninput="calc()">
+      </div>
+      <div class="ss-field ss-field-full">
+        <div class="range-row"><label>Trades per month</label><span class="range-val" id="tpmVal">20</span></div>
+        <input type="range" min="5" max="50" step="1" value="20" id="tpm" oninput="calc()">
+      </div>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div class="ctab-panel active" id="ctab-overview">
+      <div class="page-header"><h2 id="ov-title">₦200,000 Challenge</h2><p>Your core numbers at a glance.</p></div>
+      <div class="metric-grid" id="ov-metrics"></div>
+      <div class="desktop-two">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Edge analysis</span></div>
+          <div class="panel-body" id="ov-edge"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Phase roadmap</span></div>
+          <div class="panel-body" id="ov-phases"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Floating drawdown tracker</span>
+          <span class="panel-sub">Room stays ₦fixed — floor rises with profits</span>
+        </div>
+        <div class="panel-body">
+          <div class="table-wrap"><table>
+            <thead><tr><th>Balance</th><th>Gain</th><th>New floor</th><th>Room</th></tr></thead>
+            <tbody id="ov-float"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RISK ZONES TAB -->
+    <div class="ctab-panel" id="ctab-risk">
+      <div class="page-header"><h2>Risk zones</h2><p>Taper size as you approach the target.</p></div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Phase 1 tapering model</span></div>
+        <div class="panel-body" id="rz-zones"></div>
+      </div>
+      <div class="desktop-two">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Recovery table</span></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Losses</th><th>DD used</th><th>1:2 wins</th><th>1:3 wins</th><th>Status</th></tr></thead>
+            <tbody id="rz-recovery"></tbody>
+          </table></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Break-even guide</span></div>
+          <div class="panel-body" id="rz-breakeven"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILES TAB -->
+    <div class="ctab-panel" id="ctab-profiles">
+      <div class="page-header"><h2>Trader profiles</h2><p>Your row is highlighted in gold.</p></div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Performance comparison</span></div>
+        <div class="panel-body"><div class="table-wrap"><table>
+          <thead><tr><th>WR</th><th>RR</th><th>Net/10</th><th>Trades to pass</th><th>Blow %</th><th>Verdict</th></tr></thead>
+          <tbody id="pr-table"></tbody>
+        </table></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">Your profile</span></div>
+        <div class="panel-body" id="pr-current"></div>
+      </div>
+    </div>
+
+    <!-- SIM TAB -->
+    <div class="ctab-panel" id="ctab-sim">
+      <div class="page-header"><h2>Simulation</h2><p>Random sequence at your win rate. Re-run for variance.</p></div>
+      <div class="sim-btns">
+        <button class="btn-primary" onclick="runSim(false)">↺ Re-run phase 1</button>
+        <button class="btn-secondary" onclick="runSim(true)">Run both phases</button>
+      </div>
+      <div class="metric-grid" id="sim-metrics"></div>
+      <div class="desktop-two">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Trade log</span></div>
+          <div class="panel-body" id="sim-log"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Floor tracker</span></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Trade</th><th>Balance</th><th>Floor</th><th>Room</th></tr></thead>
+            <tbody id="sim-floor"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUNDED TAB -->
+    <div class="ctab-panel" id="ctab-funded">
+      <div class="page-header"><h2>Funded phase</h2><p>Protect the account and harvest consistent withdrawals.</p></div>
+      <div class="metric-grid" id="fu-metrics"></div>
+      <div class="desktop-two">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">6-month projection</span><span class="panel-sub">1/20 risk model</span></div>
+          <div class="panel-body" id="fu-months"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Profit lock system</span></div>
+          <div class="panel-body"><div class="table-wrap"><table>
+            <thead><tr><th>Profit level</th><th>Max risk</th><th>Reward</th><th>Why</th></tr></thead>
+            <tbody id="fu-lock"></tbody>
+          </table></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title">ROI summary</span></div>
+        <div class="panel-body" id="fu-roi"></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:8px 0 4px;font-size:10px;color:var(--text3);">
+      Built by <span style="color:var(--accent);font-weight:500;">Mike Woka</span>
+    </div>
+  </div><!-- /calc-body -->
+</div><!-- /screen-calc -->
+
+<script>
+// ─── NAVIGATION ───
+function showScreen(el) {
+  el.style.display = '';
+  el.classList.remove('hidden');
+  el.classList.remove('slide-left');
+}
+function hideScreen(el) {
+  el.classList.add('hidden');
+  el.classList.remove('slide-left');
+  el.style.display = '';
+}
+function goTo(from, to) {
+  var fromEl = document.getElementById('screen-' + from);
+  var toEl   = document.getElementById('screen-' + to);
+  fromEl.classList.add('slide-left');
+  showScreen(toEl);
+  setTimeout(function(){ hideScreen(fromEl); }, 360);
+  if (to === 'calc' && !calcReady) { calc(); calcReady = true; }
+  updateBottomNav(to);
+}
+function goBack(from, to) {
+  var fromEl = document.getElementById('screen-' + from);
+  var toEl   = document.getElementById('screen-' + to);
+  hideScreen(fromEl);
+  showScreen(toEl);
+  updateBottomNav(to);
+}
+
+// ─── BOTTOM NAV ───
+var currentScreen = 'home';
+function updateBottomNav(screen) {
+  currentScreen = screen;
+  var showNav = (screen !== 'splash');
+  document.getElementById('bottomNav').style.display = showNav ? 'block' : 'none';
+  document.querySelectorAll('.bnav-btn[data-screen]').forEach(function(b){
+    b.classList.remove('active');
+    if(b.dataset.screen === screen) b.classList.add('active');
+  });
+}
+
+function bnavGo(screen, el) {
+  var from = currentScreen;
+  if(from === screen) return;
+  // Navigate between main screens
+  if(from === 'sim' || from === 'funded') from = 'calc';
+  var fromEl = document.getElementById('screen-' + from);
+  var toEl   = document.getElementById('screen-' + screen);
+  if(fromEl && toEl) {
+    hideScreen(fromEl);
+    showScreen(toEl);
+    if(screen === 'calc' && !calcReady){ calc(); calcReady=true; }
+  }
+  updateBottomNav(screen);
+}
+
+function bnavGoCalcTab(tab, el) {
+  // Go to calculator and switch to that tab
+  var from = currentScreen;
+  if(from !== 'calc' && from !== 'sim' && from !== 'funded') {
+    var fromEl = document.getElementById('screen-' + from);
+    var calcEl = document.getElementById('screen-calc');
+    if(fromEl) hideScreen(fromEl);
+    showScreen(calcEl);
+    if(!calcReady){ calc(); calcReady=true; }
+  }
+  // Switch the tab
+  var tabEl = document.querySelector('.ctab[data-tab="' + tab + '"]');
+  if(tabEl) switchCalcTab(tab, tabEl);
+  updateBottomNav(tab);
+}
+
+// ─── CALC TABS ───
+var activeCalcTab = 'overview';
+var simDone = false;
+var calcReady = false;
+
+function switchCalcTab(name, el) {
+  activeCalcTab = name;
+  document.querySelectorAll('.ctab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('ctab-' + name).classList.add('active');
+  document.querySelectorAll('.ctab').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  if (name === 'sim' && !simDone) runSim(false);
+}
+
+// ─── HELPERS ───
+function fmt(n){ return '₦' + Math.round(n).toLocaleString(); }
+function pct(n,d){ return parseFloat(n).toFixed(d===undefined?1:d) + '%'; }
+function mc(cls,label,value,vcls,sub){
+  return '<div class="metric-card '+cls+'"><div class="ml">'+label+'</div><div class="mv '+(vcls||'')+'">'+value+'</div><div class="ms">'+sub+'</div></div>';
+}
+function phase_box(title,val,sub){
+  return '<div style="flex:1;background:var(--bg3);border-radius:var(--rsm);padding:10px;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">'+title+'</div><div style="font-size:16px;font-weight:700;color:var(--accent)">'+val+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px">'+sub+'</div></div>';
+}
+function stat_r(label,value,vcls){
+  return '<div class="stat-r"><span class="sr-l">'+label+'</span><span class="sr-v" style="color:var(--'+vcls+')">'+value+'</span></div>';
+}
+
+// ─── PARAMS ───
+function getParams(){
+  var acct=+document.getElementById('acctSize').value;
+  var rr=+document.getElementById('rrRatio').value;
+  var wr=+document.getElementById('winRate').value/100;
+  var tpm=+document.getElementById('tpm').value;
+  var maxDD=acct*0.2, floor=acct-maxDD, target=acct*0.1;
+  var riskPer=maxDD/10, reward=riskPer*rr, beWR=1/(1+rr);
+  var fees={200000:8900,400000:18500,600000:28000,800000:38000,1000000:48000};
+  var fee=fees[acct]||8900;
+  var expPT=wr*reward-(1-wr)*riskPer;
+  var exp10=expPT*10, ttp=expPT>0?Math.ceil(target/expPT):999;
+  return{acct:acct,rr:rr,wr:wr,tpm:tpm,maxDD:maxDD,floor:floor,target:target,riskPer:riskPer,reward:reward,beWR:beWR,fee:fee,expPT:expPT,exp10:exp10,ttp:ttp};
+}
+
+// ─── MAIN CALC ───
+function calc(){
+  document.getElementById('winRateVal').textContent = document.getElementById('winRate').value+'%';
+  document.getElementById('tpmVal').textContent = document.getElementById('tpm').value;
+  var p=getParams();
+  buildOverview(p); buildRisk(p); buildProfiles(p); buildFunded(p);
+  if(activeCalcTab==='sim') runSim(false);
+}
+
+// ─── OVERVIEW ───
+function buildOverview(p){
+  document.getElementById('ov-title').textContent=fmt(p.acct)+' Challenge';
+  var hasEdge=p.expPT>=0;
+  document.getElementById('ov-metrics').innerHTML=
+    mc('hl','Real risk capital',fmt(p.maxDD),'accent','20% of account')+
+    mc('','Account floor',fmt(p.floor),'','Breach = gone')+
+    mc('','Risk per trade',fmt(p.riskPer),'','1/10 of drawdown')+
+    mc('','Reward per win',fmt(p.reward),'','1:'+p.rr+' RR')+
+    mc('','Phase target',fmt(p.target),'','10% profit needed')+
+    mc('','Break-even WR',pct(p.beWR*100),'','Minimum to not lose')+
+    mc('','Net / 10 trades',fmt(p.exp10),hasEdge?'green':'red',hasEdge?'Positive edge':'Negative edge')+
+    mc('','Trades to pass',p.ttp>500?'500+':p.ttp,'','Fee: '+fmt(p.fee));
+
+  var margin=p.wr-p.beWR;
+  var score=Math.min(100,Math.max(0,(margin/0.3)*100));
+  var ecol=margin>0.1?'var(--green)':margin>0?'var(--amber)':'var(--red)';
+  var circ=2*Math.PI*26, dash=(score/100)*circ;
+  var acls=margin>=0.05?'ag':margin>=0?'aa':'ar';
+  var atxt=margin>=0.05?'Solid edge — viable path through both phases.':margin>=0?'Thin edge — possible but expect more variance.':'No edge at these settings. Raise win rate or RR.';
+  document.getElementById('ov-edge').innerHTML=
+    '<div class="edge-ring">'+
+      '<div class="ring-wrap"><svg width="68" height="68" viewBox="0 0 68 68">'+
+        '<circle cx="34" cy="34" r="26" fill="none" stroke="var(--bg4)" stroke-width="7"/>'+
+        '<circle cx="34" cy="34" r="26" fill="none" stroke="'+ecol+'" stroke-width="7" stroke-dasharray="'+dash.toFixed(1)+' '+circ.toFixed(1)+'" stroke-linecap="round"/>'+
+      '</svg><div class="ring-center" style="color:'+ecol+'">'+Math.round(score)+'%</div></div>'+
+      '<div><div class="ri-l">WR vs break-even</div>'+
+      '<div class="ri-v" style="color:'+ecol+'">'+(margin>=0?'+':'')+(margin*100).toFixed(1)+'pp</div>'+
+      '<div class="ri-s">Your WR: '+pct(p.wr*100)+' · Break-even: '+pct(p.beWR*100)+'</div>'+
+      '<div class="ri-s" style="margin-top:2px">Edge/trade: '+fmt(p.expPT)+'</div></div>'+
+    '</div><div class="alert '+acls+'">'+atxt+'</div>';
+
+  var wn=p.rr===2?3:2;
+  document.getElementById('ov-phases').innerHTML=
+    '<div style="display:flex;gap:6px;margin-bottom:12px">'+
+      phase_box('Phase 1',fmt(p.target),wn+' net wins')+
+      phase_box('Phase 2',fmt(p.target),wn+' net wins')+
+      phase_box('Total',fmt(p.target*2),'Both phases')+
+    '</div>'+
+    '<div style="background:var(--bg3);border-radius:var(--rsm);padding:11px;display:flex;align-items:center;gap:12px">'+
+      '<div style="font-size:24px;font-weight:700;color:var(--red)">10</div>'+
+      '<div style="font-size:11px;color:var(--text2)">Consecutive losses to blow account.<br>Probability at your WR: <strong style="color:var(--text)">'+(Math.pow(1-p.wr,10)*100).toFixed(3)+'%</strong></div>'+
+    '</div>';
+
+  var fh='';
+  [0,5,10,15,20,25,30,40,50].forEach(function(g){
+    var b=p.acct*(1+g/100), fl=b-p.maxDD;
+    var wc=g>=30?'color:var(--amber)':'';
+    fh+='<tr><td style="'+wc+'">'+fmt(b)+'</td><td style="color:var(--text2)">'+(g===0?'—':'+'+g+'%')+'</td><td>'+fmt(fl)+'</td><td style="color:var(--green)">'+fmt(p.maxDD)+'</td></tr>';
+  });
+  document.getElementById('ov-float').innerHTML=fh;
+}
+
+// ─── RISK ZONES ───
+function buildRisk(p){
+  var zones=[
+    {label:'Zone 1 — starting',range:'0%→4%',risk:p.riskPer,pct:100,col:'var(--blue)',bcls:'bb',why:'Far from target — need growth'},
+    {label:'Zone 2 — progress',range:'4%→7%',risk:p.riskPer*0.75,pct:75,col:'var(--green)',bcls:'bg',why:'Floor rising — ease off'},
+    {label:'Zone 3 — protect',range:'7%→9%',risk:p.riskPer*0.5,pct:50,col:'var(--amber)',bcls:'ba',why:'Almost done — protect gains'},
+    {label:'Zone 4 — passing',range:'9%→10%',risk:p.riskPer*0.25,pct:25,col:'var(--red)',bcls:'br',why:'Objective: do not fail'},
+  ];
+  var html='';
+  zones.forEach(function(z){
+    html+='<div class="zone-row">'+
+      '<div class="zone-top"><span class="badge '+z.bcls+'">'+z.label+'</span><span style="font-size:10px;color:var(--text3)">'+z.range+'</span></div>'+
+      '<div class="zone-bar-bg"><div class="zone-bar" style="width:'+z.pct+'%;background:'+z.col+'"></div></div>'+
+      '<div class="zone-bottom"><span>Risk: <strong style="color:'+z.col+'">'+fmt(z.risk)+'</strong></span><span>Reward: <strong>'+fmt(z.risk*p.rr)+'</strong></span><span>'+z.why+'</span></div>'+
+    '</div>';
+  });
+  document.getElementById('rz-zones').innerHTML=html;
+
+  var rec='';
+  for(var i=1;i<=10;i++){
+    var dd=p.riskPer*i, w2=i<10?Math.ceil(dd/(p.riskPer*2)):'—', w3=i<10?Math.ceil(dd/(p.riskPer*3)):'—';
+    var bc=i===10?'br':i>=7?'ba':'bg', st=i===10?'Blown':i>=7?'Danger':'OK';
+    rec+='<tr><td>'+i+'</td><td>'+fmt(dd)+'</td><td>'+w2+'</td><td>'+w3+'</td><td><span class="badge '+bc+'">'+st+'</span></td></tr>';
+  }
+  document.getElementById('rz-recovery').innerHTML=rec;
+
+  var above=p.wr>=p.beWR;
+  document.getElementById('rz-breakeven').innerHTML=
+    stat_r('Break-even WR at 1:'+p.rr,pct(p.beWR*100),'amber')+
+    stat_r('Your win rate',pct(p.wr*100),above?'green':'red')+
+    stat_r('Edge per trade',fmt(p.expPT),above?'green':'red')+
+    stat_r('Losses to blow account','10','red')+
+    '<div class="alert '+(above?'ag':'ar')+'" style="margin-top:8px">'+(above?'Above break-even — positive mathematical edge.':'Below break-even — losing strategy at current settings.')+'</div>';
+}
+
+// ─── PROFILES ───
+function buildProfiles(p){
+  var profiles=[{wr:35,rr:2},{wr:40,rr:2},{wr:45,rr:2},{wr:50,rr:2},{wr:40,rr:3},{wr:45,rr:3},{wr:50,rr:3}];
+  var myWR=Math.round(p.wr*100), myRR=p.rr;
+  var vd={35:['ba','Marginal'],40:['bg','Good'],45:['bg','Very good'],50:['bac','Excellent']};
+  var rows='';
+  profiles.forEach(function(t){
+    var rw=p.riskPer*t.rr, ev=t.wr/100*rw-(1-t.wr/100)*p.riskPer;
+    var n10=ev*10, ttp=ev>0?Math.ceil(p.target/ev):999;
+    var bp=(Math.pow(1-t.wr/100,10)*100).toFixed(3);
+    var v=vd[t.wr]||['ba','—'];
+    var isMe=t.wr===myWR&&t.rr===myRR;
+    rows+='<tr style="'+(isMe?'background:rgba(240,192,64,0.07);':'')+'">'+
+      '<td>'+(isMe?'▶ ':'')+t.wr+'%</td><td>1:'+t.rr+'</td>'+
+      '<td style="color:'+(n10>=0?'var(--green)':'var(--red)')+';font-weight:500">'+fmt(n10)+'</td>'+
+      '<td>'+(ttp>300?'300+':ttp)+'</td><td>'+bp+'%</td>'+
+      '<td><span class="badge '+v[0]+'">'+v[1]+'</span></td></tr>';
+  });
+  document.getElementById('pr-table').innerHTML=rows;
+  var bp2=(Math.pow(1-p.wr,10)*100).toFixed(3);
+  var n1k=Math.round(1/Math.pow(1-p.wr,10));
+  document.getElementById('pr-current').innerHTML=
+    '<div class="metric-grid" style="margin-bottom:0">'+
+    mc('','Your win rate',pct(p.wr*100),'accent','')+
+    mc('','Your RR','1:'+p.rr,'accent','')+
+    mc('','Edge/trade',fmt(p.expPT),p.expPT>=0?'green':'red','')+
+    mc('','Net/10 trades',fmt(p.exp10),p.exp10>=0?'green':'red','')+
+    mc('','Blow probability',bp2+'%','amber','')+
+    mc('','1 in N',n1k.toLocaleString(),'','sequences')+
+    '</div>';
+}
+
+// ─── SIMULATION ───
+var simData=[];
+function runSim(both){
+  var p=getParams(); simData=[]; simDone=true;
+  function simPhase(startBal){
+    var bal=startBal,fl=bal-p.maxDD,tgt=startBal*1.1;
+    var trades=[],blown=false,passed=false;
+    for(var i=0;i<60;i++){
+      if(blown||passed) break;
+      var win=Math.random()<p.wr, ch=win?p.reward:-p.riskPer;
+      bal+=ch;
+      if(bal>startBal) fl=bal-p.maxDD;
+      if(bal<=fl) blown=true;
+      if(bal>=tgt) passed=true;
+      trades.push({n:i+1,win:win,ch:ch,bal:bal,floor:fl,blown:blown,passed:passed});
+    }
+    return{trades:trades,blown:blown,passed:passed,finalBal:bal};
+  }
+  var ph1=simPhase(p.acct); simData=[ph1];
+  if(both&&ph1.passed) simData.push(simPhase(ph1.finalBal));
+  var trades=ph1.trades, blown=ph1.blown, passed=ph1.passed;
+  var wins=trades.filter(function(t){return t.win;}).length;
+  var losses=trades.length-wins;
+  var finalBal=trades.length?trades[trades.length-1].bal:p.acct;
+  var pnl=finalBal-p.acct;
+  var oLabel=blown?'Blown':passed?'Passed ✓':'In progress';
+  var oColor=blown?'red':passed?'green':'amber';
+  document.getElementById('sim-metrics').innerHTML=
+    mc('','Total trades',trades.length,'','')+
+    mc('','Wins',wins,'green',losses+' losses')+
+    mc('','Actual WR',trades.length?pct(wins/trades.length*100):'—','','')+
+    mc('','P&L',fmt(pnl),pnl>=0?'green':'red','')+
+    mc('','Final balance',fmt(finalBal),'','')+
+    mc('','Outcome',oLabel,oColor,'');
+  var logHtml='';
+  trades.forEach(function(t){
+    var pb=Math.min(100,Math.max(0,((t.bal-(p.acct-p.maxDD))/p.maxDD)*100));
+    var col=t.blown?'var(--red)':t.passed?'var(--green)':t.win?'var(--green)':'var(--red)';
+    logHtml+='<div class="trade-row"><span class="trade-n">'+t.n+'</span><span class="trade-r" style="color:'+col+'">'+(t.win?'+':'')+fmt(t.ch)+'</span><div class="trade-bg"><div class="trade-b" style="width:'+pb+'%;background:'+col+'"></div></div><span class="trade-bl">'+fmt(t.bal)+'</span></div>';
+  });
+  var ph2=simData[1];
+  var oAlert=blown?'<div class="alert ar" style="margin-top:8px"><strong>Account blown.</strong> Floor was breached. Reduce risk earlier.</div>':passed?'<div class="alert ag" style="margin-top:8px"><strong>'+(both&&ph2?(ph2.passed?'Both phases passed!':'Phase 1 passed!'):'Phase 1 passed!')+'</strong> '+(both&&ph2&&ph2.passed?'Claim your funded account.':'Enter Phase 2 protected.')+'</div>':'<div class="alert aa" style="margin-top:8px">Still in progress after 60 trades — edge may be thin.</div>';
+  document.getElementById('sim-log').innerHTML=logHtml+oAlert;
+  var step=Math.max(1,Math.floor(trades.length/8));
+  var fRows='';
+  trades.forEach(function(t,i){
+    if(i%step===0||i===trades.length-1){
+      var room=t.bal-t.floor;
+      var rc=room<p.maxDD*0.3?'color:var(--red)':room<p.maxDD*0.6?'color:var(--amber)':'';
+      fRows+='<tr><td>'+t.n+'</td><td>'+fmt(t.bal)+'</td><td>'+fmt(t.floor)+'</td><td style="'+rc+';font-weight:500">'+fmt(room)+'</td></tr>';
+    }
+  });
+  document.getElementById('sim-floor').innerHTML=fRows;
+}
+
+// ─── FUNDED ───
+function buildFunded(p){
+  var fr=p.maxDD/20, frw=fr*p.rr;
+  var wins=Math.round(p.tpm*p.wr), losses=p.tpm-wins;
+  var gross=wins*frw-losses*fr, payout=gross*0.8, annual=payout*12;
+  var tcp=p.target*2, cpay=tcp*0.8;
+  var roi=((cpay-p.fee)/p.fee*100).toFixed(0);
+  var mtr=payout>0?Math.ceil(p.fee/payout):'∞';
+  document.getElementById('fu-metrics').innerHTML=
+    mc('hl','Risk/trade (1/20)',fmt(fr),'accent','Half of challenge risk')+
+    mc('','Wins / '+p.tpm,wins,'green',losses+' losses')+
+    mc('','Gross monthly',fmt(gross),gross>=0?'green':'red','')+
+    mc('','Monthly payout',fmt(payout),payout>=0?'green':'red','80% split')+
+    mc('','Annual',fmt(annual),payout>=0?'green':'red','')+
+    mc('','Fee recovery',mtr+' mo','','months to break even');
+  var labels=['M1','M2','M3','M4','M5','M6'];
+  var pays=labels.map(function(){return Math.max(0,payout*(1+(Math.random()*2-1)*0.25));});
+  var maxP=Math.max.apply(null,pays.concat([1]));
+  var mh='<div class="month-grid">';
+  pays.forEach(function(mv,i){
+    var h=Math.round((mv/maxP)*60);
+    mh+='<div class="month-bwrap"><div class="month-bbg"><div class="month-bfill" style="height:'+h+'px;background:'+(mv>payout?'var(--green)':'var(--blue)')+'"></div></div><div class="month-lbl">'+labels[i]+'</div><div class="month-val">'+fmt(mv)+'</div></div>';
+  });
+  mh+='</div><div class="alert aa" style="margin-top:10px;font-size:11px">±25% natural variance. Actual results depend on execution.</div>';
+  document.getElementById('fu-months').innerHTML=mh;
+  var locks=[{l:'0–5%',r:fr,w:'Normal'},{l:'5–8%',r:fr*0.75,w:'Floor rising'},{l:'8–9%',r:fr*0.5,w:'Protect gains'},{l:'9%+',r:fr*0.25,w:'Pure protection'}];
+  var pl='';
+  locks.forEach(function(lk){ pl+='<tr><td>'+lk.l+'</td><td>'+fmt(lk.r)+'</td><td>'+fmt(lk.r*p.rr)+'</td><td style="color:var(--text2)">'+lk.w+'</td></tr>'; });
+  document.getElementById('fu-lock').innerHTML=pl;
+  document.getElementById('fu-roi').innerHTML=
+    '<div class="metric-grid" style="margin-bottom:0">'+
+    mc('','Challenge fee',fmt(p.fee),'','')+mc('','Total profit',fmt(tcp),'','Phase 1+2')+
+    mc('','Payout (80%)',fmt(cpay),'accent','')+mc('','Net after fee',fmt(cpay-p.fee),'green','')+
+    mc('','ROI on fee',roi+'%','green','')+mc('','Fee recovered',mtr+' month'+(mtr===1?'':'s'),'','')+
+    '</div>';
+}
+
+// ─── INIT ───
+(function(){
+  // Always start from splash on every device
+  ['screen-home','screen-about','screen-rules','screen-calc'].forEach(function(id){
+    var el = document.getElementById(id);
+    el.style.display = 'none';
+    el.classList.add('hidden');
+    el.classList.remove('slide-left');
+  });
+  var splash = document.getElementById('screen-splash');
+  splash.style.display = '';
+  splash.classList.remove('hidden');
+  splash.classList.remove('slide-left');
+
+  // Desktop: auto-advance to home after 2s (no tap needed)
+  if(window.innerWidth >= 769){
+    setTimeout(function(){
+      goTo('splash','home');
+    }, 2000);
+  }
+  // Mobile: waits for "Get started" tap
+})();
+</script>
+
+<!-- ── BOTTOM NAV (mobile) ── -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn" data-screen="home" onclick="bnavGo('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="bnav-btn" data-screen="about" onclick="bnavGo('about',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      About
+    </button>
+    <button class="bnav-btn" data-screen="rules" onclick="bnavGo('rules',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Rules
+    </button>
+    <button class="bnav-btn active" data-screen="calc" onclick="bnavGo('calc',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+      Calc
+    </button>
+    <button class="bnav-btn" data-screen="sim" onclick="bnavGoCalcTab('sim',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Simulate
+    </button>
+    <button class="bnav-btn" data-screen="funded" onclick="bnavGoCalcTab('funded',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Funded
+    </button>
+  </div>
+</nav>
+
+</body>
+</html>
